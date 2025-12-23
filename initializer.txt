@@ -1,0 +1,29 @@
+npm i -g pnpm
+npx create-turbo@latest
+
+pnpm install
+pnpm run dev
+
+inside backend folders in apps:
+    npm init -y        
+    import typescript config from packages in both backend apps
+    add the same package as devDependency in packages.json of backend apps
+    "devDependencies": {
+        "@repo/typescript-config": "workspace:*"
+    },
+    
+    pnpm install
+
+
+add build, dev and start scripts in backend servers packages.json:
+"scripts": {
+    "build": "tsc -b",
+    "start": "node dist/index.js",
+    "dev": "npm run build && npm run start"
+},
+
+add src and destination folders for both backend apps in tsconfig.json:
+"compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./dist"
+}
