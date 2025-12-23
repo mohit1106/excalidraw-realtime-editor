@@ -27,3 +27,17 @@ add src and destination folders for both backend apps in tsconfig.json:
     "rootDir": "./src",
     "outDir": "./dist"
 }
+
+
+
+adding express dependency inside backend servers: 
+    pnpm add express @types/express
+
+
+adding another package(backend-common) in packages:
+    npm init -y
+    change name in package.json
+    do tsconfig.json
+    add tsconfig as devDependencies in package.json
+    in backend-common, pnpm add @types/node  for process.env
+    then add export options in package.json
