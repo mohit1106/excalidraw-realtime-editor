@@ -12,7 +12,7 @@ inside backend folders in apps:
         "@repo/typescript-config": "workspace:*"
     },
     
-    pnpm install
+    run pnpm install globally(root project folder)
 
 
 add build, dev and start scripts in backend servers packages.json:
@@ -41,3 +41,21 @@ adding another package(backend-common) in packages:
     add tsconfig as devDependencies in package.json
     in backend-common, pnpm add @types/node  for process.env
     then add export options in package.json
+
+
+
+adding db package:
+    create db folder in packages
+    npm init-y
+    create tsconfig.json and make it extend, then add as devDependencies in package.json
+    then global pnpm install
+
+    create src/index.tsc
+    pnpm install prisma (inside db)
+    npx prisma init (inside db)
+
+    do migrating(inside db package):
+        npx prisma migrate dev --name init_schema
+        pnpm i @prisma/client
+        npx prisma generate
+    update package.json to export the db package
