@@ -50,12 +50,24 @@ adding db package:
     create tsconfig.json and make it extend, then add as devDependencies in package.json
     then global pnpm install
 
-    create src/index.tsc
+    create src/index.ts
     pnpm install prisma (inside db)
     npx prisma init (inside db)
 
-    do migrating(inside db package):
+    do migrating(inside db package) (everytime schema changes):
         npx prisma migrate dev --name init_schema
         pnpm i @prisma/client
         npx prisma generate
-    update package.json to export the db package
+    update package.json to export the db package, also change name to @repo/db
+    import it in http backend package.json
+
+
+
+    if using version 7 prisma(dont use 7, its shit):
+    for connecting at runtime backend with db, the previous method is not work anymore:
+    pnpm add @prisma/adapter-pg pg
+    pnpm add @types/pg 
+    update the db/src/index.ts to export the PrismaClient differently
+    pnpm add dotenv
+
+    pnpm add @prisma/client
