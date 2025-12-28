@@ -71,3 +71,12 @@ adding db package:
     pnpm add dotenv
 
     pnpm add @prisma/client
+
+
+
+
+
+in apps (creating excalidraw frontend) :
+    npx create-next-app@latest
+    if importing anything from packages, add it as dependency inside excalidraw frontend package.json
+    
