@@ -127,7 +127,19 @@ CD pipeline to refresh certs every month
 
 
 
+------ install nvm on ec2------------------
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 
+export NVM_DIR="$HOME/.nvm"
+source "$NVM_DIR/nvm.sh"
+
+# install node
+nvm install 22
+nvm use 22
+nvm alias default 22
+
+# global tools
+npm install -g pnpm pm2
 
 
 
