@@ -1,0 +1,153 @@
+---------------- topics --------------------------------
+Deploying a monorepo (http, ws, prisma, postgres, next)
+env variables
+dev vs prod vs staging environments, periodic releases
+    when code is pushed to main branch, it is deployed to staging environment not production.
+    after sometime sync/merge staging to production environment.
+Testing in CI pipelines
+Cert management
+CD pipeline to refresh certs every month
+
+
+
+
+
+
+
+
+
+
+
+-- create two branches main/master(for dev env) and production(for prod env)
+    git checkout -b production
+    git push origin HEAD
+
+-- create two instances/ervers on ec2 or digitalOcean for dev environment and prod environment
+-- install nodeJs and nginx to both servers by sshing into the machines using private key
+-- install pnpm on both machines
+   npm install -g pnpm
+
+-- go to your squarespace domains to add dns entries (let it's mohit.com)
+   add records:
+        realtimeeditor-http                  <prod server ip>
+        realtimeeditor-ws                    <prod server ip>
+        realtimeeditor-frontend              <prod server ip>
+
+        staging.realtimeeditor-http          <dev server ip>
+        staging.realtimeeditor-ws            <dev server ip>
+        staging.realtimeeditor-frontend      <dev server ip>
+
+-- clone the github monorepo to both the servers
+-- cd to the cloned repo root folder in both servers/machines
+-- pnpm install (globally in both)
+-- create two projects/databases on neon (for dev and for prod)
+   use DATABASE_URL of dev in .env of dev server's db package and of prod in prod server's db package
+-- migrate the both databses in servers
+   npx prisma migrate dev
+-- pnpm run build (in root folder in both servers)
+-- for cd to different apps(http, ws, frontend) in servers and start them by npm run start
+   use pm2 for process mangement (npm i -g pm2) in both servers
+   cd to http-backend then (pm2 start npm --name "http-backend" -- start)
+   cd to ws-backend then (pm2 start npm --name "ws-backend" -- start)
+   cd to excalidraw-frontend then (pm2 start npm --name "excalidraw-frontend" -- start)
+   pm2 list - to see all processess running on server
+   do this on both servers
+-- so now both ec2 servers have their three apps running using pm2 on addresses
+   <prod server ip>:3000 (realtimeeditor-frontend.mohit.com:3000)    
+   <prod server ip>:3001 (realtimeeditor-http.mohit.com:3001) 
+   <prod server ip>:8080 (realtimeeditor-ws.mohit.com:8080) 
+
+-- now run nginx on port 80, so configur nginx
+    1. open the both ec2 machines by SShing 
+    2. Create reverse proxy in both:
+    sudo rm sudo vi /etc/nginx/nginx.conf
+    sudo vi /etc/nginx/nginx.conf
+
+    3. add this in nginx.conf file in both prod and dev server(change in dev domains):
+    /////////////////////////////////////////////////////////////////////////
+        events {
+            # Event directives...
+        }
+        http {
+            server {
+            listen 80;
+            server_name realtimeeditor-ws.mohit.com;
+            location / {
+                proxy_pass http://localhost:8080;
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection 'upgrade';
+                proxy_set_header Host $host;
+                proxy_cache_bypass $http_upgrade;
+            }
+            }
+
+            server {
+            listen 80;
+            server_name realtimeeditor-http.mohit.com;
+            location / {
+                proxy_pass http://localhost:3001;
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection 'upgrade';
+                proxy_set_header Host $host;
+                proxy_cache_bypass $http_upgrade;
+            }
+            }
+
+            server {
+            listen 80;
+            server_name realtimeeditor-frontend.mohit.com;
+            location / {
+                proxy_pass http://localhost:3000;
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection 'upgrade';
+                proxy_set_header Host $host;
+                proxy_cache_bypass $http_upgrade;
+            }
+            }
+        }
+    /////////////////////////////////////////////////////////////////////////////
+-- (sudo nginx -s reload) in both servers
+-- add branch rulesets in git repo so noone can push directly to production branch.
+
+
+
+
+
+
+
+-- put your private key for ec2 machine in github repo settings insecrets and variables
+   and add repository secret.
+
+
+
+
+
+
+
+------ install nvm on ec2------------------
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+
+export NVM_DIR="$HOME/.nvm"
+source "$NVM_DIR/nvm.sh"
+
+# install node
+nvm install 22
+nvm use 22
+nvm alias default 22
+
+# global tools
+npm install -g pnpm pm2
+
+
+
+
+
+
+
+
+
+
+

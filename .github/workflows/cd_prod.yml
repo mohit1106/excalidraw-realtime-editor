@@ -1,0 +1,44 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - production
+
+jobs:
+  redeploy_production_server:
+    name: Deploying production server
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/ssh_key
+          chmod 600 ~/ssh_key
+
+          ssh -o StrictHostKeyChecking=no -i ~/ssh_key root@164.25.21.35 << 'EOF'
+            set -e
+
+            # Load Node via NVM
+            export NVM_DIR="/root/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+            nvm use 22
+
+            # Ensure tools exist
+            command -v pnpm >/dev/null 2>&1 || npm install -g pnpm
+            command -v pm2  >/dev/null 2>&1 || npm install -g pm2
+
+            # Deploy production branch
+            cd excalidraw-realtime-editor || exit 1
+            git fetch origin
+            git checkout production
+            git pull origin production
+
+            pnpm install
+            pnpm run build
+
+            pm2 restart excalidraw-frontend
+            pm2 restart http-backend
+            pm2 restart ws-backend
+          EOF
+
